@@ -1,9 +1,10 @@
 from pathlib import Path
+from typing import Any, Dict, Tuple
+
 import pandas as pd
 import yaml
-from typing import Tuple, Dict, Any
-from models.random_forest import RandomForestModel
 from models.base_model import BaseModel
+from models.random_forest import RandomForestModel
 
 
 def load_processed_data(

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any
+from typing import Any, Dict
+
 import pandas as pd
 
 
@@ -40,6 +41,7 @@ class BaseModel(ABC):
         """
         pass
 
+    @abstractmethod
     def save(self, path: str) -> None:
         """
         Save the trained model.
@@ -49,6 +51,7 @@ class BaseModel(ABC):
         """
         pass
 
+    @abstractmethod
     def load(self, path: str) -> None:
         """
         Load a trained model.

@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Dict, List, Tuple
+
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 

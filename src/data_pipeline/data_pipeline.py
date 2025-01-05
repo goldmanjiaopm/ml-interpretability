@@ -1,7 +1,8 @@
 from pathlib import Path
+
 import pandas as pd
+from data_preprocessing import create_tfidf_features, get_label_columns, load_data, preprocess_text
 from sklearn.model_selection import train_test_split
-from data_preprocessing import load_data, preprocess_text, create_tfidf_features, get_label_columns
 
 
 def process_data(data_path: Path = Path("data/raw"), output_path: Path = Path("data/processed")) -> None:
