@@ -3,14 +3,26 @@ from typing import Any, Dict, Tuple
 
 import pandas as pd
 import yaml
-from models.base_model import BaseModel
-from models.random_forest import RandomForestModel
+from sklearn.metrics import classification_report
+
+from src.training_pipeline.models.base_model import BaseModel
+from src.training_pipeline.models.random_forest import RandomForestModel
 
 
 def load_processed_data(
-    data_path: Path = Path("data/processed"),
+    data_path: Path = None,
 ) -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
-    """Load processed features and labels."""
+    """
+    Load processed features and labels.
+
+    Args:
+        data_path: Optional path to processed data directory. If None, uses project root.
+    """
+    if data_path is None:
+        # Get the project root (2 levels up from this file)
+        project_root = Path(__file__).parent.parent.parent
+        data_path = project_root / "data/processed"
+
     train_features = pd.read_csv(data_path / "train_features.csv")
     train_labels = pd.read_csv(data_path / "train_labels.csv")["Labels"]
     val_features = pd.read_csv(data_path / "val_features.csv")

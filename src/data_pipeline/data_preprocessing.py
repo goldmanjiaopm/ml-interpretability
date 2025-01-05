@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Dict, List, Tuple
-
+import re
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -47,21 +47,33 @@ def preprocess_text(text: str) -> str:
     return text
 
 
-def create_tfidf_features(texts: List[str], max_features: int = 5000) -> Tuple[TfidfVectorizer, pd.DataFrame]:
+def create_tfidf_features(
+    texts: List[str], max_features: int = 5000, vectorizer: TfidfVectorizer = None
+) -> Tuple[TfidfVectorizer, pd.DataFrame]:
     """
     Create TF-IDF features from text data.
 
     Args:
         texts: List of preprocessed text strings
         max_features: Maximum number of features to create
+        vectorizer: Optional pre-fitted TfidfVectorizer. If None, creates and fits a new one.
 
     Returns:
         Tuple of (fitted TfidfVectorizer, DataFrame of TF-IDF features)
     """
-    # customise stop words and ngram range (include bigrams)
-    tfidf = TfidfVectorizer(max_features=max_features, stop_words="english", ngram_range=(1, 1))
 
-    features = tfidf.fit_transform(texts)
-    feature_names = [f"tfidf_{f}" for f in tfidf.get_feature_names_out()]
+    def remove_numbers(text: str) -> str:
+        return re.sub(r"\d+", "", text)
 
-    return tfidf, pd.DataFrame(features.toarray(), columns=feature_names)
+    if vectorizer is None:
+        # Initialize and fit new vectorizer
+        vectorizer = TfidfVectorizer(
+            max_features=max_features, stop_words="english", ngram_range=(1, 1), preprocessor=remove_numbers
+        )
+        features = vectorizer.fit_transform(texts)
+    else:
+        # Use pre-fitted vectorizer
+        features = vectorizer.transform(texts)
+
+    feature_names = [f"tfidf_{f}" for f in vectorizer.get_feature_names_out()]
+    return vectorizer, pd.DataFrame(features.toarray(), columns=feature_names)

@@ -41,7 +41,7 @@ class BaseModel(ABC):
         """
         pass
 
-    @abstractmethod
+    # @abstractmethod
     def save(self, path: str) -> None:
         """
         Save the trained model.
@@ -51,7 +51,7 @@ class BaseModel(ABC):
         """
         pass
 
-    @abstractmethod
+    # @abstractmethod
     def load(self, path: str) -> None:
         """
         Load a trained model.

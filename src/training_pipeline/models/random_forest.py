@@ -3,7 +3,7 @@ from typing import Any, Dict
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 
-from .base_model import BaseModel
+from src.training_pipeline.models.base_model import BaseModel
 
 
 class RandomForestModel(BaseModel):
