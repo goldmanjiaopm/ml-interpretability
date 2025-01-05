@@ -20,8 +20,8 @@ def load_data(data_path: Path = Path("data/raw")) -> Tuple[pd.DataFrame, pd.Data
 
 
 def get_label_columns() -> List[str]:
-    """Get the list of label columns as defined in the PRD."""
-    return ["Barely-True", "False", "Half-True", "Mostly-True", "Not-Known", "True"]
+    """Get the list of label columns as defined in the data."""
+    return ["Labels"]
 
 
 def preprocess_text(text: str) -> str:
