@@ -6,4 +6,7 @@ venv/
 __pycache__/
 
 prd.md
+project_documentation.md
 
+data/
+tests/
