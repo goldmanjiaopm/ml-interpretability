@@ -7,6 +7,8 @@ from sklearn.metrics import classification_report
 
 from src.training_pipeline.models.base_model import BaseModel
 from src.training_pipeline.models.random_forest import RandomForestModel
+from src.training_pipeline.tuning import tune_hyperparameters
+from src.training_pipeline.models.param_spaces import get_random_forest_param_space
 
 
 def load_processed_data(
@@ -66,13 +68,15 @@ def evaluate_model(model: BaseModel, val_features: pd.DataFrame, val_labels: pd.
     return report
 
 
-def train_and_evaluate(model_name: str, config_path: Path) -> Dict[str, Any]:
+def train_and_evaluate(model_name: str, config_path: Path, tune: bool = False, n_trials: int = 100) -> Dict[str, Any]:
     """
     Train and evaluate a model.
 
     Args:
         model_name: Name of the model to train
         config_path: Path to model configuration file
+        tune: Whether to perform hyperparameter tuning
+        n_trials: Number of optimization trials if tuning
 
     Returns:
         Evaluation metrics
@@ -80,9 +84,30 @@ def train_and_evaluate(model_name: str, config_path: Path) -> Dict[str, Any]:
     # Load data
     train_features, train_labels, val_features, val_labels = load_processed_data()
 
-    # Load config and initialize model
-    configs = load_model_config(config_path)
-    model = get_model(model_name, configs[model_name])
+    # Get model class
+    models = {
+        "random_forest": RandomForestModel,
+        # Add more models here
+    }
+    model_class = models[model_name]
+
+    if tune:
+        # Get parameter space for the model
+        param_spaces = {
+            "random_forest": get_random_forest_param_space,
+            # Add more parameter spaces here
+        }
+        param_space = param_spaces[model_name]()
+
+        # Tune hyperparameters
+        best_params = tune_hyperparameters(
+            model_class, train_features, train_labels, val_features, val_labels, param_space, n_trials=n_trials
+        )
+        model = model_class(best_params)
+    else:
+        # Load config and initialize model
+        configs = load_model_config(config_path)
+        model = model_class(configs[model_name])
 
     # Train and evaluate
     model.train(train_features, train_labels)
