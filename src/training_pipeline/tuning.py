@@ -78,8 +78,8 @@ def tune_hyperparameters(
 
     objective = create_objective(model_class, train_features, train_labels, val_features, val_labels, param_space)
 
-    # Add progress bar
-    with tqdm(total=n_trials, desc="Tuning") as pbar:
+    # Add progress bar with position and leave parameters
+    with tqdm(total=n_trials, desc="Tuning", position=0, leave=True) as pbar:
 
         def callback(study: optuna.Study, trial: optuna.Trial) -> None:
             pbar.update(1)
