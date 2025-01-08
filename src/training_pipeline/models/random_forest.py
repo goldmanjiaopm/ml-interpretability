@@ -1,3 +1,4 @@
+import pickle
 from typing import Any, Dict
 
 import pandas as pd
@@ -40,3 +41,13 @@ class RandomForestModel(BaseModel):
             Predictions
         """
         return pd.Series(self.model.predict(features))
+
+    def save(self, path: str) -> None:
+        """Save the trained model to a pickle file."""
+        with open(path, "wb") as f:
+            pickle.dump(self.model, f)
+
+    def load(self, path: str) -> None:
+        """Load a trained model from a pickle file."""
+        with open(path, "rb") as f:
+            self.model = pickle.load(f)
