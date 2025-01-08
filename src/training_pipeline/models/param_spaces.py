@@ -11,4 +11,5 @@ def get_random_forest_param_space() -> Dict[str, Callable[[optuna.Trial], Any]]:
         "min_samples_leaf": lambda trial: trial.suggest_int("min_samples_leaf", 1, 10),
         "random_state": lambda trial: 42,
         "n_jobs": lambda trial: -1,
+        "max_features": lambda trial: trial.suggest_float("max_features", 0.1, 1.0),
     }
