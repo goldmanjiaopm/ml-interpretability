@@ -1,9 +1,11 @@
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Tuple
 
+import numpy as np
 import pandas as pd
 import yaml
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, roc_curve
 
 from src.training_pipeline.models.base_model import BaseModel
 from src.training_pipeline.models.param_spaces import get_random_forest_param_space
@@ -68,6 +70,36 @@ def evaluate_model(model: BaseModel, val_features: pd.DataFrame, val_labels: pd.
     return report
 
 
+def find_optimal_threshold(model: BaseModel, val_features: pd.DataFrame, val_labels: pd.Series) -> float:
+    """
+    Find the optimal threshold that maximizes the ROC curve's distance from the diagonal.
+
+    Args:
+        model: Trained model
+        val_features: Validation features
+        val_labels: Validation labels
+
+    Returns:
+        Optimal threshold value
+    """
+    # Get probability predictions
+    y_pred_proba = model.predict_proba(val_features)
+
+    # For each class, find optimal threshold
+    n_classes = y_pred_proba.shape[1]
+    thresholds = []
+
+    for i in range(n_classes):
+        # Calculate ROC curve
+        fpr, tpr, threshold = roc_curve((val_labels == i).astype(int), y_pred_proba[:, i])
+
+        # Find optimal threshold (point closest to top-left corner)
+        optimal_idx = np.argmax(tpr - fpr)
+        thresholds.append(threshold[optimal_idx])
+
+    return np.array(thresholds)
+
+
 def train_and_evaluate(model_name: str, config_path: Path, tune: bool = False, n_trials: int = 100) -> Dict[str, Any]:
     """Train and evaluate a model."""
     # Load data
@@ -96,25 +128,26 @@ def train_and_evaluate(model_name: str, config_path: Path, tune: bool = False, n
         configs = load_model_config(config_path)
         model = model_class(configs[model_name])
 
-    # Train and evaluate
-    print(f"Training {model_name} model...")
+    # Train model
     model.train(train_features, train_labels)
-    print(f"Evaluating {model_name} model...")
+
+    # Find and set optimal thresholds
+    optimal_thresholds = find_optimal_threshold(model, val_features, val_labels)
+    model.set_thresholds(optimal_thresholds)
+
+    # Evaluate with optimal thresholds
     metrics = evaluate_model(model, val_features, val_labels)
 
-    # Create models directory if it doesn't exist
-    path = f"models/{model_name}"
-    models_dir = Path(path)
-    models_dir.mkdir(exist_ok=True)
+    # Add threshold information to metrics
+    metrics["optimal_thresholds"] = optimal_thresholds.tolist()
 
-    # Save the model with timestamp
-    from datetime import datetime
+    # Save model
+    models_dir = Path(f"models/{model_name}")
+    models_dir.mkdir(exist_ok=True)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     model_path = models_dir / f"{model_name}_{metrics['accuracy']:.4f}_{timestamp}.pkl"
     model.save(str(model_path))
 
-    # Add model path to metrics
     metrics["model_path"] = str(model_path)
-
     return metrics

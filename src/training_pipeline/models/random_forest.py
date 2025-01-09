@@ -1,6 +1,8 @@
+import os
 import pickle
 from typing import Any, Dict
 
+import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 
@@ -32,7 +34,7 @@ class RandomForestModel(BaseModel):
 
     def predict(self, features: pd.DataFrame) -> pd.Series:
         """
-        Make predictions using the trained model.
+        Make predictions using the trained model and optimal threshold.
 
         Args:
             features: Features to predict on
@@ -40,7 +42,15 @@ class RandomForestModel(BaseModel):
         Returns:
             Predictions
         """
-        return pd.Series(self.model.predict(features))
+        if self.thresholds is None:
+            return pd.Series(self.model.predict(features))
+
+        # Get probability predictions
+        proba = self.predict_proba(features)
+
+        # Apply thresholds for each class
+        predictions = np.argmax(proba >= self.thresholds.reshape(1, -1), axis=1)
+        return pd.Series(predictions)
 
     def save(self, path: str) -> None:
         """Save the trained model to a pickle file."""
@@ -51,3 +61,19 @@ class RandomForestModel(BaseModel):
         """Load a trained model from a pickle file."""
         with open(path, "rb") as f:
             self.model = pickle.load(f)
+
+    def predict_proba(self, features: pd.DataFrame) -> np.ndarray:
+        """
+        Make probability predictions using the trained model.
+
+        Args:
+            features: Features to predict on
+
+        Returns:
+            Array of prediction probabilities
+        """
+        return self.model.predict_proba(features)
+
+    def set_thresholds(self, thresholds: np.ndarray) -> None:
+        """Set optimal thresholds for prediction."""
+        self.thresholds = thresholds

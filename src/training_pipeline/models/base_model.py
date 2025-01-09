@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict
 
 import pandas as pd
+import numpy as np
 
 
 class BaseModel(ABC):
@@ -38,6 +39,19 @@ class BaseModel(ABC):
 
         Returns:
             Predictions
+        """
+        pass
+
+    @abstractmethod
+    def predict_proba(self, features: pd.DataFrame) -> np.ndarray:
+        """
+        Make probability predictions using the trained model.
+
+        Args:
+            features: Features to predict on
+
+        Returns:
+            Array of prediction probabilities
         """
         pass
 

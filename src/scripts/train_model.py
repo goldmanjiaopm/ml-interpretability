@@ -3,6 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 from src.training_pipeline.train import train_and_evaluate
+from src.training_pipeline.utils import get_device_info
 
 
 def main():
@@ -18,6 +19,13 @@ def main():
     project_root = Path(__file__).parent.parent.parent
     config_path = project_root / "src/training_pipeline/configs/model_configs.yaml"
 
+    # Print device information
+    device_info = get_device_info()
+    print("\nCompute Device Information:")
+    print(f"Device: {device_info['device']}")
+    print(f"Type: {device_info['type']}")
+    print(f"Backend: {device_info['backend']}")
+
     print(f"\nStarting training for {args.model}")
     print(f"{'With' if args.tune else 'Without'} hyperparameter tuning")
     if args.tune:
@@ -29,6 +37,8 @@ def main():
     # Print results
     print("\nTraining Results:")
     print(f"Model saved at: {metrics.pop('model_path')}")
+    print(f"Optimal thresholds: {metrics.pop('optimal_thresholds')}")
+    print(f"Accuracy: {metrics.pop('accuracy')}")
     print("\nMetrics:")
     for label, scores in metrics.items():
         if isinstance(scores, dict):

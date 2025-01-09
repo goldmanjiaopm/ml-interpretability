@@ -1,8 +1,9 @@
 from pathlib import Path
-from typing import Dict, Any, Callable
+from typing import Any, Callable, Dict
+
 import optuna
 import pandas as pd
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import roc_auc_score
 from tqdm import tqdm
 
 from src.training_pipeline.models.base_model import BaseModel
@@ -17,7 +18,7 @@ def create_objective(
     param_space: Dict[str, Callable[[optuna.Trial], Any]],
 ) -> Callable[[optuna.Trial], float]:
     """
-    Create an objective function for Optuna optimization.
+    Create an objective function for Optuna optimization using ROC AUC score.
 
     Args:
         model_class: Class of the model to tune
@@ -39,9 +40,9 @@ def create_objective(
         model = model_class(config)
         model.train(train_features, train_labels)
 
-        # Get predictions and calculate score
-        predictions = model.predict(val_features)
-        score = accuracy_score(val_labels, predictions)
+        # Get predictions and calculate ROC AUC score
+        predictions = model.predict_proba(val_features)
+        score = roc_auc_score(val_labels, predictions, multi_class="ovr", average="macro")
 
         return score
 
