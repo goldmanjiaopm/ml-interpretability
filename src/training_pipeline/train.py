@@ -8,8 +8,9 @@ import yaml
 from sklearn.metrics import classification_report, roc_curve
 
 from src.training_pipeline.models.base_model import BaseModel
-from src.training_pipeline.models.param_spaces import get_random_forest_param_space
+from src.training_pipeline.models.param_spaces import get_model_class, get_param_space
 from src.training_pipeline.models.random_forest import RandomForestModel
+from src.training_pipeline.models.xgboost_model import XGBoostModel
 from src.training_pipeline.tuning import tune_hyperparameters
 
 
@@ -54,6 +55,7 @@ def get_model(model_name: str, config: Dict[str, Any]) -> BaseModel:
     """
     models = {
         "random_forest": RandomForestModel,
+        "xgboost": XGBoostModel,
         # Add more models here
     }
 
@@ -106,18 +108,11 @@ def train_and_evaluate(model_name: str, config_path: Path, tune: bool = False, n
     train_features, train_labels, val_features, val_labels = load_processed_data()
 
     # Get model class
-    models = {
-        "random_forest": RandomForestModel,
-    }
-    model_class = models[model_name]
+    model_class = get_model_class(model_name)
 
     if tune:
         # Get parameter space for the model
-        param_spaces = {
-            "random_forest": get_random_forest_param_space,
-        }
-        param_space = param_spaces[model_name]()
-
+        param_space = get_param_space(model_name)()
         # Tune hyperparameters
         best_params = tune_hyperparameters(
             model_class, train_features, train_labels, val_features, val_labels, param_space, n_trials=n_trials
