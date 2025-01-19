@@ -21,6 +21,7 @@ class RandomForestModel(BaseModel):
         """
         super().__init__(config)
         self.model = RandomForestClassifier(**self.config)
+        self.thresholds = None
 
     def train(self, features: pd.DataFrame, labels: pd.Series) -> None:
         """

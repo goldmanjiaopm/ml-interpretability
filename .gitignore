@@ -10,4 +10,5 @@ project_documentation.md
 
 data/
 tests/
-models/random_forest 
+models/random_forest
+models/xgboost
