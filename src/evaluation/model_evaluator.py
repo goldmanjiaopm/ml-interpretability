@@ -88,8 +88,8 @@ class ModelEvaluator:
 
     def plot_roc_curves(self, features: pd.DataFrame, true_labels: pd.Series, figsize: tuple = (10, 8)) -> None:
         """Plot ROC curves for each class."""
+        from sklearn.metrics import auc, roc_curve
         from sklearn.preprocessing import label_binarize
-        from sklearn.metrics import roc_curve, auc
 
         probabilities = self.model.predict_proba(features)
         n_classes = probabilities.shape[1]

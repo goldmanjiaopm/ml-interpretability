@@ -47,7 +47,7 @@ def main():
 
     # Plot visualizations
     print("\nGenerating plots...")
-    # evaluator.plot_confusion_matrix(val_features, val_labels)
+    evaluator.plot_confusion_matrix(val_features, val_labels)
     evaluator.plot_roc_curves(val_features, val_labels)
 
     # Print metrics
